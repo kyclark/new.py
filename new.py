@@ -25,7 +25,7 @@ class Args(NamedTuple):
 
 # --------------------------------------------------
 def get_args() -> Args:
-    """Get arguments"""
+    """ Get arguments """
 
     parser = argparse.ArgumentParser(
         description='Create Python argparse program',
@@ -72,7 +72,7 @@ def get_args() -> Args:
 
 # --------------------------------------------------
 def main() -> None:
-    """Make a jazz noise here"""
+    """ Make a jazz noise here """
 
     args = get_args()
     program = args.program
@@ -101,11 +101,20 @@ Purpose: {args.purpose}
 \"\"\"
 
 import argparse
+from typing import NamedTuple, TextIO
+
+
+class Args(NamedTuple):
+    positional: str
+    string_arg: str
+    int_arg: int
+    file: TextIO
+    on: bool
 
 
 # --------------------------------------------------
-def get_args():
-    \"\"\"Get command-line arguments\"\"\"
+def get_args() -> Args:
+    \"\"\" Get command-line arguments \"\"\"
 
     parser = argparse.ArgumentParser(
         description='{args.purpose}',
@@ -141,16 +150,18 @@ def get_args():
                         help='A boolean flag',
                         action='store_true')
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    return Args(args.positional, args.arg, args.int, args.file, args.on)
 
 
 # --------------------------------------------------
-def main():
-    \"\"\"Make a jazz noise here\"\"\"
+def main() -> None:
+    \"\"\" Make a jazz noise here \"\"\"
 
     args = get_args()
-    str_arg = args.arg
-    int_arg = args.int
+    str_arg = args.string_arg
+    int_arg = args.int_arg
     file_arg = args.file
     flag_arg = args.on
     pos_arg = args.positional
@@ -170,7 +181,7 @@ if __name__ == '__main__':
 
 # --------------------------------------------------
 def get_defaults():
-    """Get defaults from ~/.new.py"""
+    """ Get defaults from ~/.new.py """
 
     rc = os.path.join(str(Path.home()), '.new.py')
     defaults = {}
