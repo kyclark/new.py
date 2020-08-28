@@ -99,7 +99,12 @@ def main() -> None:
     subprocess.run(['chmod', '+x', program])
 
     if args.write_test:
-        test_file = os.path.splitext(args.program)[0] + '_test.py'
+        test_dir = os.path.join(os.getcwd(), 'tests')
+        if not os.path.isdir(test_dir):
+            os.makedirs(test_dir)
+
+        basename = os.path.splitext(args.program)[0] + '_test.py'
+        test_file = os.path.join(test_dir, basename)
         print(text_test(args.program), file=open(test_file, 'wt'))
         makefile = ['.PHONY: test', '', 'test:', '\tpython3 -m pytest -xv']
         print('\n'.join(makefile), file=open('Makefile', 'wt'))
@@ -231,9 +236,9 @@ def test_usage():
 def test_ok():
     \"\"\" OK \"\"\"
 
-    rv, out = getstatusoutput(f'{{PRG}}')
+    rv, out = getstatusoutput(f'{{PRG}} foo')
     assert rv == 0
-    assert out.strip() == 'OK'
+    assert out.splitlines()[-1] == 'positional = "foo"'
     """
 
     return tmpl.rstrip().format(prg)

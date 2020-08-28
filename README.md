@@ -91,8 +91,10 @@ Done, see new script "foo.py."
 Now you should have the following files:
 
 ```
-$ ls
-Makefile	foo.py*		foo_test.py
+$ find . -type f
+./Makefile
+./tests/foo_test.py
+./foo.py
 ```
 
 You can run "make test" to execute "python3 -m pytest -xv":
@@ -100,7 +102,14 @@ You can run "make test" to execute "python3 -m pytest -xv":
 ```
 $ make test
 python3 -m pytest -xv
+============================= test session starts ==============================
 ...
+
+tests/foo_test.py::test_exists PASSED                                    [ 33%]
+tests/foo_test.py::test_usage PASSED                                     [ 66%]
+tests/foo_test.py::test_ok PASSED                                        [100%]
+
+============================== 3 passed in 0.27s ===============================
 ```
 
 ## See Also
