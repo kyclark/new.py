@@ -29,6 +29,7 @@ def get_args() -> Args:
     """ Get arguments """
 
     parser = argparse.ArgumentParser(
+        prog='new.py',
         description='Create Python argparse program',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
