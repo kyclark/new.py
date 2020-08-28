@@ -21,6 +21,7 @@ class Args(NamedTuple):
     email: str
     purpose: str
     overwrite: bool
+    write_test: bool
 
 
 # --------------------------------------------------
@@ -46,7 +47,8 @@ def get_args() -> Args:
     parser.add_argument('-e',
                         '--email',
                         type=str,
-                        default=defaults.get('email', f'{username}@{hostname}'),
+                        default=defaults.get('email',
+                                             f'{username}@{hostname}'),
                         help='Email for docstring')
 
     parser.add_argument('-p',
@@ -54,6 +56,11 @@ def get_args() -> Args:
                         type=str,
                         default=defaults.get('purpose', 'Rock the Casbah'),
                         help='Purpose for docstring')
+
+    parser.add_argument('-t',
+                        '--write_test',
+                        help='Create basic test.py',
+                        action='store_true')
 
     parser.add_argument('-f',
                         '--force',
@@ -67,7 +74,12 @@ def get_args() -> Args:
     if not args.program:
         parser.error(f'Not a usable filename "{args.program}"')
 
-    return Args(args.program, args.name, args.email, args.purpose, args.force)
+    return Args(program=args.program,
+                name=args.name,
+                email=args.email,
+                purpose=args.purpose,
+                overwrite=args.force,
+                write_test=args.write_test)
 
 
 # --------------------------------------------------
@@ -84,6 +96,13 @@ def main() -> None:
 
     print(body(args), file=open(program, 'wt'), end='')
     subprocess.run(['chmod', '+x', program])
+
+    if args.write_test:
+        test_file = os.path.splitext(args.program)[0] + '_test.py'
+        print(text_test(args.program), file=open(test_file, 'wt'))
+        makefile = ['.PHONY: test', '', 'test:', '\tpython3 -m pytest -xv']
+        print('\n'.join(makefile), file=open('Makefile', 'wt'))
+
     print(f'Done, see new script "{program}."')
 
 
@@ -177,6 +196,46 @@ def main() -> None:
 if __name__ == '__main__':
     main()
 """
+
+
+# --------------------------------------------------
+def text_test(prg) -> str:
+    """ Template for test.py """
+
+    tmpl = """
+import os
+from subprocess import getstatusoutput
+
+PRG = './{}'
+
+
+# --------------------------------------------------
+def test_exists():
+    \"\"\" Program exists \"\"\"
+
+    assert os.path.isfile(PRG)
+
+
+# --------------------------------------------------
+def test_usage():
+    \"\"\" Usage \"\"\"
+
+    for flag in ['-h', '--help']:
+        rv, out = getstatusoutput(f'{{PRG}} {{flag}}')
+        assert rv == 0
+        assert out.lower().startswith('usage')
+
+
+# --------------------------------------------------
+def test_ok():
+    \"\"\" OK \"\"\"
+
+    rv, out = getstatusoutput(f'{{PRG}}')
+    assert rv == 0
+    assert out.strip() == 'OK'
+    """
+
+    return tmpl.rstrip().format(prg)
 
 
 # --------------------------------------------------
