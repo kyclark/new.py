@@ -112,7 +112,7 @@ https://github.com/kyclark/tiny_python_projects/blob/master/bin/new.py
 This version is different in that it incorporates type hints and uses structures like named tuples as records/structs to represent complex, typed objects such as the program "Args".
 
 [Chapter 1](http://tinypythonprojects.com/#/chapters/1) of the book covers how to use "new.py" to start a new program.
-The [TPP appendix](http://tinypythonprojects.com/#/chapters/23) covers argparse in greater detail.
+The [appendix](http://tinypythonprojects.com/#/chapters/23) covers argparse in greater detail.
 
 ## Author
 
