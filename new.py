@@ -92,7 +92,7 @@ def main() -> None:
     args = get_args()
     program = args.program
 
-    if os.path.isfile(program) and not args.overwrite:
+    if Path(program).is_file() and not args.overwrite:
         answer = input(f'"{program}" exists.  Overwrite? [yN] ')
         if not answer.lower().startswith("y"):
             sys.exit("Will not overwrite. Bye!")
@@ -102,12 +102,11 @@ def main() -> None:
         subprocess.run(["chmod", "+x", program])
 
     if args.write_test:
-        test_dir = os.path.join(os.getcwd(), "tests")
-        if not os.path.isdir(test_dir):
-            os.makedirs(test_dir)
+        test_dir = Path.cwd() / "tests"
+        test_dir.mkdir(exist_ok=True)
 
-        basename = os.path.splitext(args.program)[0] + "_test.py"
-        test_file = os.path.join(test_dir, basename)
+        basename = "test_" + args.program
+        test_file = Path(test_dir) / Path(basename)
         Path(test_file).write_text(text_test(args.program))
         makefile = [".PHONY: test", "", "test:", "\tpython3 -m pytest -xv"]
         Path("Makefile").write_text("\n".join(makefile))
@@ -241,15 +240,16 @@ def test_ok():
 def get_defaults():
     """Get defaults from ~/.new.py"""
 
-    rc = os.path.join(str(Path.home()), ".new.py")
+    rc = Path.home() / ".new.py"
     defaults = {}
-    if os.path.isfile(rc):
-        for line in open(rc):
-            match = re.match("([^=]+)=([^=]+)", line)
-            if match:
-                key, val = map(str.strip, match.groups())
-                if key and val:
-                    defaults[key] = val
+    if rc.exists():
+        with open(rc, "rt") as f:
+            for line in f:
+                match = re.match("([^=]+)=([^=]+)", line)
+                if match:
+                    key, val = map(str.strip, match.groups())
+                    if key and val:
+                        defaults[key] = val
 
     return defaults
 
