@@ -6,6 +6,7 @@ Forked from: https://github.com/kyclark/new.py
 
 
 import argparse
+import configparser
 import os
 import re
 import subprocess
@@ -238,20 +239,13 @@ def test_ok():
 
 
 def get_defaults():
-    """Get defaults from ~/.new.py"""
+    """Get defaults from ~/defaults.ini"""
 
-    rc = Path.home() / ".new.py"
-    defaults = {}
-    if rc.exists():
-        with open(rc, "rt") as f:
-            for line in f:
-                match = re.match("([^=]+)=([^=]+)", line)
-                if match:
-                    key, val = map(str.strip, match.groups())
-                    if key and val:
-                        defaults[key] = val
+    rc = Path.home() / "defaults.ini"
+    config = configparser.ConfigParser()
+    config.read(rc)
 
-    return defaults
+    return config["new"]
 
 
 if __name__ == "__main__":
