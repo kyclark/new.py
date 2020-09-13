@@ -95,8 +95,9 @@ def main() -> None:
         if not answer.lower().startswith('y'):
             sys.exit('Will not overwrite. Bye!')
 
-    print(body(args), file=open(program, 'wt'), end='')
-    subprocess.run(['chmod', '+x', program])
+    Path(program).write_text(body(args))
+    if not sys.platform.startswith("win32"):
+        subprocess.run(["chmod", "+x", program])
 
     if args.write_test:
         test_dir = os.path.join(os.getcwd(), 'tests')
@@ -105,9 +106,9 @@ def main() -> None:
 
         basename = os.path.splitext(args.program)[0] + '_test.py'
         test_file = os.path.join(test_dir, basename)
-        print(text_test(args.program), file=open(test_file, 'wt'))
-        makefile = ['.PHONY: test', '', 'test:', '\tpython3 -m pytest -xv']
-        print('\n'.join(makefile), file=open('Makefile', 'wt'))
+        Path(test_file).write_text(text_test(args.program))
+        makefile = [".PHONY: test", "", "test:", "\tpython3 -m pytest -xv"]
+        Path("Makefile").write_text("\n".join(makefile))
 
     print(f'Done, see new script "{program}."')
 
