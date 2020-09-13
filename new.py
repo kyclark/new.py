@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Author : Ken Youens-Clark <kyclark@gmail.com>
-Purpose: Python program to write a Python program
+Python program to write a Python program
+Forked from: https://github.com/kyclark/new.py
 """
 
 
@@ -12,7 +12,6 @@ import subprocess
 import sys
 from datetime import date
 from pathlib import Path
-
 from typing import NamedTuple
 
 
@@ -26,7 +25,7 @@ class Args(NamedTuple):
 
 
 def get_args() -> Args:
-    """ Get arguments """
+    """Get arguments."""
 
     parser = argparse.ArgumentParser(
         prog="new.py",
@@ -88,7 +87,7 @@ def get_args() -> Args:
 
 
 def main() -> None:
-    """ Make a jazz noise here """
+    """Make a jazz noise here."""
 
     args = get_args()
     program = args.program
@@ -117,7 +116,7 @@ def main() -> None:
 
 
 def body(args: Args) -> str:
-    """ The program template """
+    """The program template."""
 
     today = str(date.today())
 
@@ -141,7 +140,7 @@ class Args(NamedTuple):
 
 
 def get_args() -> Args:
-    \"\"\" Get command-line arguments \"\"\"
+    \"\"\"Get command-line arguments.\"\"\"
 
     parser = argparse.ArgumentParser(
         description='{args.purpose}',
@@ -183,7 +182,7 @@ def get_args() -> Args:
 
 
 def main() -> None:
-    \"\"\" Make a jazz noise here \"\"\"
+    \"\"\"Make a jazz noise here.\"\"\"
 
     args = get_args()
     str_arg = args.string_arg
@@ -205,43 +204,42 @@ if __name__ == '__main__':
 
 
 def text_test(prg) -> str:
-    """ Template for test.py """
+    """Template for test.py."""
 
-    tmpl = """
-import os
+    tmpl = """import os
 from subprocess import getstatusoutput
 
 PRG = './{}'
 
 
 def test_exists():
-    \"\"\" Program exists \"\"\"
+    \"\"\"Program exists.\"\"\"
 
     assert os.path.isfile(PRG)
 
 
 def test_usage():
-    \"\"\" Usage \"\"\"
+    \"\"\"Usage.\"\"\"
 
     for flag in ['-h', '--help']:
-        rv, out = getstatusoutput(f'{{PRG}} {{flag}}')
-        assert rv == 0
-        assert out.lower().startswith('usage')
+        exitcode, output = getstatusoutput(f'{{PRG}} {{flag}}')
+        assert exitcode == 0
+        assert output.lower().startswith('usage')
 
 
 def test_ok():
-    \"\"\" OK \"\"\"
+    \"\"\"OK.\"\"\"
 
-    rv, out = getstatusoutput(f'{{PRG}} foo')
-    assert rv == 0
-    assert out.splitlines()[-1] == 'positional = "foo"'
+    exitcode, output = getstatusoutput(f'{{PRG}} foo')
+    assert exitcode == 0
+    assert output.splitlines()[-1] == 'positional = "foo"'
     """
 
     return tmpl.rstrip().format(prg)
 
 
 def get_defaults():
-    """ Get defaults from ~/.new.py """
+    """Get defaults from ~/.new.py"""
 
     rc = os.path.join(str(Path.home()), ".new.py")
     defaults = {}
