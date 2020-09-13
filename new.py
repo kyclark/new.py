@@ -4,6 +4,7 @@ Author : Ken Youens-Clark <kyclark@gmail.com>
 Purpose: Python program to write a Python program
 """
 
+
 import argparse
 import os
 import re
@@ -24,66 +25,68 @@ class Args(NamedTuple):
     write_test: bool
 
 
-# --------------------------------------------------
 def get_args() -> Args:
     """ Get arguments """
 
     parser = argparse.ArgumentParser(
-        prog='new.py',
-        description='Create Python argparse program',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        prog="new.py",
+        description="Create Python argparse program",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
 
     defaults = get_defaults()
-    username = os.getenv('USER') or 'Anonymous'
-    hostname = os.getenv('HOSTNAME') or 'localhost'
+    username = os.getenv("USER") or "Anonymous"
+    hostname = os.getenv("HOSTNAME") or "localhost"
 
-    parser.add_argument('program', help='Program name', type=str)
+    parser.add_argument("program", help="Program name", type=str)
 
-    parser.add_argument('-n',
-                        '--name',
-                        type=str,
-                        default=defaults.get('name', username),
-                        help='Name for docstring')
+    parser.add_argument(
+        "-n",
+        "--name",
+        type=str,
+        default=defaults.get("name", username),
+        help="Name for docstring",
+    )
 
-    parser.add_argument('-e',
-                        '--email',
-                        type=str,
-                        default=defaults.get('email',
-                                             f'{username}@{hostname}'),
-                        help='Email for docstring')
+    parser.add_argument(
+        "-e",
+        "--email",
+        type=str,
+        default=defaults.get("email", f"{username}@{hostname}"),
+        help="Email for docstring",
+    )
 
-    parser.add_argument('-p',
-                        '--purpose',
-                        type=str,
-                        default=defaults.get('purpose', 'Rock the Casbah'),
-                        help='Purpose for docstring')
+    parser.add_argument(
+        "-p",
+        "--purpose",
+        type=str,
+        default=defaults.get("purpose", "Rock the Casbah"),
+        help="Purpose for docstring",
+    )
 
-    parser.add_argument('-t',
-                        '--write_test',
-                        help='Create basic test.py',
-                        action='store_true')
+    parser.add_argument(
+        "-t", "--write_test", help="Create basic test.py", action="store_true"
+    )
 
-    parser.add_argument('-f',
-                        '--force',
-                        help='Overwrite existing',
-                        action='store_true')
+    parser.add_argument("-f", "--force", help="Overwrite existing", action="store_true")
 
     args = parser.parse_args()
 
-    args.program = args.program.strip().replace('-', '_')
+    args.program = args.program.strip().replace("-", "_")
 
     if not args.program:
         parser.error(f'Not a usable filename "{args.program}"')
 
-    return Args(program=args.program,
-                name=args.name,
-                email=args.email,
-                purpose=args.purpose,
-                overwrite=args.force,
-                write_test=args.write_test)
+    return Args(
+        program=args.program,
+        name=args.name,
+        email=args.email,
+        purpose=args.purpose,
+        overwrite=args.force,
+        write_test=args.write_test,
+    )
 
 
-# --------------------------------------------------
 def main() -> None:
     """ Make a jazz noise here """
 
@@ -92,19 +95,19 @@ def main() -> None:
 
     if os.path.isfile(program) and not args.overwrite:
         answer = input(f'"{program}" exists.  Overwrite? [yN] ')
-        if not answer.lower().startswith('y'):
-            sys.exit('Will not overwrite. Bye!')
+        if not answer.lower().startswith("y"):
+            sys.exit("Will not overwrite. Bye!")
 
     Path(program).write_text(body(args))
     if not sys.platform.startswith("win32"):
         subprocess.run(["chmod", "+x", program])
 
     if args.write_test:
-        test_dir = os.path.join(os.getcwd(), 'tests')
+        test_dir = os.path.join(os.getcwd(), "tests")
         if not os.path.isdir(test_dir):
             os.makedirs(test_dir)
 
-        basename = os.path.splitext(args.program)[0] + '_test.py'
+        basename = os.path.splitext(args.program)[0] + "_test.py"
         test_file = os.path.join(test_dir, basename)
         Path(test_file).write_text(text_test(args.program))
         makefile = [".PHONY: test", "", "test:", "\tpython3 -m pytest -xv"]
@@ -113,7 +116,6 @@ def main() -> None:
     print(f'Done, see new script "{program}."')
 
 
-# --------------------------------------------------
 def body(args: Args) -> str:
     """ The program template """
 
@@ -138,7 +140,6 @@ class Args(NamedTuple):
     on: bool
 
 
-# --------------------------------------------------
 def get_args() -> Args:
     \"\"\" Get command-line arguments \"\"\"
 
@@ -181,7 +182,6 @@ def get_args() -> Args:
     return Args(args.positional, args.arg, args.int, args.file, args.on)
 
 
-# --------------------------------------------------
 def main() -> None:
     \"\"\" Make a jazz noise here \"\"\"
 
@@ -199,13 +199,11 @@ def main() -> None:
     print(f'positional = "{{pos_arg}}"')
 
 
-# --------------------------------------------------
 if __name__ == '__main__':
     main()
 """
 
 
-# --------------------------------------------------
 def text_test(prg) -> str:
     """ Template for test.py """
 
@@ -216,14 +214,12 @@ from subprocess import getstatusoutput
 PRG = './{}'
 
 
-# --------------------------------------------------
 def test_exists():
     \"\"\" Program exists \"\"\"
 
     assert os.path.isfile(PRG)
 
 
-# --------------------------------------------------
 def test_usage():
     \"\"\" Usage \"\"\"
 
@@ -233,7 +229,6 @@ def test_usage():
         assert out.lower().startswith('usage')
 
 
-# --------------------------------------------------
 def test_ok():
     \"\"\" OK \"\"\"
 
@@ -245,15 +240,14 @@ def test_ok():
     return tmpl.rstrip().format(prg)
 
 
-# --------------------------------------------------
 def get_defaults():
     """ Get defaults from ~/.new.py """
 
-    rc = os.path.join(str(Path.home()), '.new.py')
+    rc = os.path.join(str(Path.home()), ".new.py")
     defaults = {}
     if os.path.isfile(rc):
         for line in open(rc):
-            match = re.match('([^=]+)=([^=]+)', line)
+            match = re.match("([^=]+)=([^=]+)", line)
             if match:
                 key, val = map(str.strip, match.groups())
                 if key and val:
@@ -262,6 +256,5 @@ def get_defaults():
     return defaults
 
 
-# --------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
