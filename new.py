@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """
-Author : Ken Youens-Clark <kyclark@gmail.com>
-Purpose: Python program to write a Python program
+Python program to write a Python program
+Forked from: https://github.com/kyclark/new.py
 """
 
+
 import argparse
+import configparser
 import os
 import re
 import subprocess
 import sys
 from datetime import date
 from pathlib import Path
-
 from typing import NamedTuple
 
 
@@ -24,97 +25,98 @@ class Args(NamedTuple):
     write_test: bool
 
 
-# --------------------------------------------------
 def get_args() -> Args:
-    """ Get arguments """
+    """Get arguments."""
 
     parser = argparse.ArgumentParser(
-        prog='new.py',
-        description='Create Python argparse program',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        prog="new.py",
+        description="Create Python argparse program",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
 
     defaults = get_defaults()
-    username = os.getenv('USER') or 'Anonymous'
-    hostname = os.getenv('HOSTNAME') or 'localhost'
+    username = os.getenv("USER") or "Anonymous"
+    hostname = os.getenv("HOSTNAME") or "localhost"
 
-    parser.add_argument('program', help='Program name', type=str)
+    parser.add_argument("program", help="Program name", type=str)
 
-    parser.add_argument('-n',
-                        '--name',
-                        type=str,
-                        default=defaults.get('name', username),
-                        help='Name for docstring')
+    parser.add_argument(
+        "-n",
+        "--name",
+        type=str,
+        default=defaults.get("name", username),
+        help="Name for docstring",
+    )
 
-    parser.add_argument('-e',
-                        '--email',
-                        type=str,
-                        default=defaults.get('email',
-                                             f'{username}@{hostname}'),
-                        help='Email for docstring')
+    parser.add_argument(
+        "-e",
+        "--email",
+        type=str,
+        default=defaults.get("email", f"{username}@{hostname}"),
+        help="Email for docstring",
+    )
 
-    parser.add_argument('-p',
-                        '--purpose',
-                        type=str,
-                        default=defaults.get('purpose', 'Rock the Casbah'),
-                        help='Purpose for docstring')
+    parser.add_argument(
+        "-p",
+        "--purpose",
+        type=str,
+        default=defaults.get("purpose", "Rock the Casbah"),
+        help="Purpose for docstring",
+    )
 
-    parser.add_argument('-t',
-                        '--write_test',
-                        help='Create basic test.py',
-                        action='store_true')
+    parser.add_argument(
+        "-t", "--write_test", help="Create basic test.py", action="store_true"
+    )
 
-    parser.add_argument('-f',
-                        '--force',
-                        help='Overwrite existing',
-                        action='store_true')
+    parser.add_argument("-f", "--force", help="Overwrite existing", action="store_true")
 
     args = parser.parse_args()
 
-    args.program = args.program.strip().replace('-', '_')
+    args.program = args.program.strip().replace("-", "_")
 
     if not args.program:
         parser.error(f'Not a usable filename "{args.program}"')
 
-    return Args(program=args.program,
-                name=args.name,
-                email=args.email,
-                purpose=args.purpose,
-                overwrite=args.force,
-                write_test=args.write_test)
+    return Args(
+        program=args.program,
+        name=args.name,
+        email=args.email,
+        purpose=args.purpose,
+        overwrite=args.force,
+        write_test=args.write_test,
+    )
 
 
-# --------------------------------------------------
 def main() -> None:
-    """ Make a jazz noise here """
+    """Make a jazz noise here."""
 
     args = get_args()
     program = args.program
 
-    if os.path.isfile(program) and not args.overwrite:
+    if Path(program).is_file() and not args.overwrite:
         answer = input(f'"{program}" exists.  Overwrite? [yN] ')
-        if not answer.lower().startswith('y'):
-            sys.exit('Will not overwrite. Bye!')
+        if not answer.lower().startswith("y"):
+            sys.exit("Will not overwrite. Bye!")
 
-    print(body(args), file=open(program, 'wt'), end='')
-    subprocess.run(['chmod', '+x', program])
+    Path(program).write_text(body(args))
+    if not sys.platform.startswith("win32"):
+        subprocess.run(["chmod", "+x", program])
 
     if args.write_test:
-        test_dir = os.path.join(os.getcwd(), 'tests')
-        if not os.path.isdir(test_dir):
-            os.makedirs(test_dir)
+        test_dir = Path.cwd() / "tests"
+        test_dir.mkdir(exist_ok=True)
 
-        basename = os.path.splitext(args.program)[0] + '_test.py'
-        test_file = os.path.join(test_dir, basename)
-        print(text_test(args.program), file=open(test_file, 'wt'))
-        makefile = ['.PHONY: test', '', 'test:', '\tpython3 -m pytest -xv']
-        print('\n'.join(makefile), file=open('Makefile', 'wt'))
+        basename = "test_" + args.program
+        test_file = Path(test_dir) / Path(basename)
+        Path(test_file).write_text(text_test(args.program))
+        makefile = [".PHONY: test", "", "test:", "\tpython3 -m pytest -xv"]
+        Path("Makefile").write_text("\n".join(makefile))
 
     print(f'Done, see new script "{program}."')
 
 
-# --------------------------------------------------
 def body(args: Args) -> str:
-    """ The program template """
+    """The program template."""
 
     today = str(date.today())
 
@@ -137,9 +139,8 @@ class Args(NamedTuple):
     on: bool
 
 
-# --------------------------------------------------
 def get_args() -> Args:
-    \"\"\" Get command-line arguments \"\"\"
+    \"\"\"Get command-line arguments.\"\"\"
 
     parser = argparse.ArgumentParser(
         description='{args.purpose}',
@@ -180,9 +181,8 @@ def get_args() -> Args:
     return Args(args.positional, args.arg, args.int, args.file, args.on)
 
 
-# --------------------------------------------------
 def main() -> None:
-    \"\"\" Make a jazz noise here \"\"\"
+    \"\"\"Make a jazz noise here.\"\"\"
 
     args = get_args()
     str_arg = args.string_arg
@@ -198,69 +198,55 @@ def main() -> None:
     print(f'positional = "{{pos_arg}}"')
 
 
-# --------------------------------------------------
 if __name__ == '__main__':
     main()
 """
 
 
-# --------------------------------------------------
 def text_test(prg) -> str:
-    """ Template for test.py """
+    """Template for test.py."""
 
-    tmpl = """
-import os
+    tmpl = """import os
 from subprocess import getstatusoutput
 
 PRG = './{}'
 
 
-# --------------------------------------------------
 def test_exists():
-    \"\"\" Program exists \"\"\"
+    \"\"\"Program exists.\"\"\"
 
     assert os.path.isfile(PRG)
 
 
-# --------------------------------------------------
 def test_usage():
-    \"\"\" Usage \"\"\"
+    \"\"\"Usage.\"\"\"
 
     for flag in ['-h', '--help']:
-        rv, out = getstatusoutput(f'{{PRG}} {{flag}}')
-        assert rv == 0
-        assert out.lower().startswith('usage')
+        exitcode, output = getstatusoutput(f'{{PRG}} {{flag}}')
+        assert exitcode == 0
+        assert output.lower().startswith('usage')
 
 
-# --------------------------------------------------
 def test_ok():
-    \"\"\" OK \"\"\"
+    \"\"\"OK.\"\"\"
 
-    rv, out = getstatusoutput(f'{{PRG}} foo')
-    assert rv == 0
-    assert out.splitlines()[-1] == 'positional = "foo"'
+    exitcode, output = getstatusoutput(f'{{PRG}} foo')
+    assert exitcode == 0
+    assert output.splitlines()[-1] == 'positional = "foo"'
     """
 
     return tmpl.rstrip().format(prg)
 
 
-# --------------------------------------------------
 def get_defaults():
-    """ Get defaults from ~/.new.py """
+    """Get defaults from ~/defaults.ini"""
 
-    rc = os.path.join(str(Path.home()), '.new.py')
-    defaults = {}
-    if os.path.isfile(rc):
-        for line in open(rc):
-            match = re.match('([^=]+)=([^=]+)', line)
-            if match:
-                key, val = map(str.strip, match.groups())
-                if key and val:
-                    defaults[key] = val
+    rc = Path.home() / "defaults.ini"
+    config = configparser.ConfigParser()
+    config.read(rc)
 
-    return defaults
+    return config["new"]
 
 
-# --------------------------------------------------
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
