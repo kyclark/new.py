@@ -76,6 +76,7 @@ You can indicate the name and email address you wish to appear in the program's 
 $ cat ~/.new.py
 name=Ken Youens-Clark
 email=kyclark@gmail.com
+purpose=Look out, you rock-and-rollers!
 ```
 
 The `-p|--purpose` option will also become part of the program docstring/argparse documentation.
@@ -110,6 +111,18 @@ tests/foo_test.py::test_usage PASSED                                     [ 66%]
 tests/foo_test.py::test_ok PASSED                                        [100%]
 
 ============================== 3 passed in 0.27s ===============================
+```
+
+## Installation
+
+You can copy the `new.py` program to any directory currently in your `$PATH`.
+It's common to place programs into a directory like `/usr/local/bin`, but this often will require root priviliges.
+A common workaround is to create a writable directory in your `$HOME` where you can place programs.
+I like to use `$HOME/.local` as the "prefix" for local software installations.
+This means that `$HOME/.local/bin` will usually the be location where binaries will be placed; therefore I will add this to my `.bash_profile` (or `.bashrc`) file:
+
+```
+export PATH=$HOME/.local/bin:$PATH
 ```
 
 ## See Also

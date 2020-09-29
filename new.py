@@ -12,10 +12,11 @@ import sys
 from datetime import date
 from pathlib import Path
 
-from typing import NamedTuple
+from typing import NamedTuple, Optional, TextIO
 
 
 class Args(NamedTuple):
+    """ Command-line arguments """
     program: str
     name: str
     email: str
@@ -33,7 +34,8 @@ def get_args() -> Args:
         description='Create Python argparse program',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    defaults = get_defaults()
+    rc_file = os.path.join(str(Path.home()), '.new.py')
+    defaults = get_defaults(open(rc_file) if os.path.isfile(rc_file) else None)
     username = os.getenv('USER') or 'Anonymous'
     hostname = os.getenv('HOSTNAME') or 'localhost'
 
@@ -96,7 +98,7 @@ def main() -> None:
             sys.exit('Will not overwrite. Bye!')
 
     print(body(args), file=open(program, 'wt'), end='')
-    subprocess.run(['chmod', '+x', program])
+    subprocess.run(['chmod', '+x', program], check=True)
 
     if args.write_test:
         test_dir = os.path.join(os.getcwd(), 'tests')
@@ -109,7 +111,7 @@ def main() -> None:
         makefile = ['.PHONY: test', '', 'test:', '\tpython3 -m pytest -xv']
         print('\n'.join(makefile), file=open('Makefile', 'wt'))
 
-    print(f'Done, see new script "{program}."')
+    print(f'Done, see new script "{program}".')
 
 
 # --------------------------------------------------
@@ -245,13 +247,12 @@ def test_ok():
 
 
 # --------------------------------------------------
-def get_defaults():
+def get_defaults(file_handle: Optional[TextIO]):
     """ Get defaults from ~/.new.py """
 
-    rc = os.path.join(str(Path.home()), '.new.py')
     defaults = {}
-    if os.path.isfile(rc):
-        for line in open(rc):
+    if file_handle:
+        for line in file_handle:
             match = re.match('([^=]+)=([^=]+)', line)
             if match:
                 key, val = map(str.strip, match.groups())
