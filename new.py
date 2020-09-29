@@ -107,9 +107,20 @@ def main() -> None:
 
         basename = os.path.splitext(args.program)[0] + '_test.py'
         test_file = os.path.join(test_dir, basename)
-        print(text_test(args.program), file=open(test_file, 'wt'))
-        makefile = ['.PHONY: test', '', 'test:', '\tpython3 -m pytest -xv']
-        print('\n'.join(makefile), file=open('Makefile', 'wt'))
+        if os.path.isfile(test_file):
+            print(f'Will not overwrite "{test_file}"!')
+        else:
+            print(text_test(args.program), file=open(test_file, 'wt'))
+
+        makefile_text = [
+            '.PHONY: test', '', 'test:',
+            '\tpython3 -m pytest -xv --flake8 --pylint'
+        ]
+        makefile = 'Makefile'
+        if os.path.isfile(makefile):
+            print(f'Will not overwrite "{makefile}"!')
+        else:
+            print('\n'.join(makefile), file=open('Makefile', 'wt'))
 
     print(f'Done, see new script "{program}".')
 
@@ -132,6 +143,7 @@ from typing import NamedTuple, TextIO
 
 
 class Args(NamedTuple):
+    \"\"\" Command-line arguments \"\"\"
     positional: str
     string_arg: str
     int_arg: int
@@ -210,7 +222,9 @@ if __name__ == '__main__':
 def text_test(prg) -> str:
     """ Template for test.py """
 
-    tmpl = """
+    tmpl = """\
+\"\"\" Tests \"\"\"
+
 import os
 from subprocess import getstatusoutput
 
@@ -229,8 +243,8 @@ def test_usage():
     \"\"\" Usage \"\"\"
 
     for flag in ['-h', '--help']:
-        rv, out = getstatusoutput(f'{{PRG}} {{flag}}')
-        assert rv == 0
+        retval, out = getstatusoutput(f'{{PRG}} {{flag}}')
+        assert retval == 0
         assert out.lower().startswith('usage')
 
 
@@ -238,8 +252,8 @@ def test_usage():
 def test_ok():
     \"\"\" OK \"\"\"
 
-    rv, out = getstatusoutput(f'{{PRG}} foo')
-    assert rv == 0
+    retval, out = getstatusoutput(f'{{PRG}} foo')
+    assert retval == 0
     assert out.splitlines()[-1] == 'positional = "foo"'
     """
 
