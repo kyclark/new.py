@@ -120,7 +120,7 @@ def main() -> None:
         if os.path.isfile(makefile):
             print(f'Will not overwrite "{makefile}"!')
         else:
-            print('\n'.join(makefile), file=open('Makefile', 'wt'))
+            print('\n'.join(makefile_text), file=open('Makefile', 'wt'))
 
     print(f'Done, see new script "{program}".')
 
