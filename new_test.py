@@ -29,7 +29,7 @@ def test_get_defaults():
     }
     text = io.StringIO('\n'.join(f'{k}={v}' for k, v in expected.items()))
     assert get_defaults(text) == expected
-    assert get_defaults(None) == {}
+    assert not get_defaults(None)
 
 
 # --------------------------------------------------
