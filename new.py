@@ -36,7 +36,15 @@ def get_args() -> Args:
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     rc_file = os.path.join(str(Path.home()), '.new.py')
-    defaults = get_defaults(open(rc_file) if os.path.isfile(rc_file) else None)
+
+    defaults = None
+
+    if os.path.isfile(rc_file):
+        with open(rc_file, encoding='utf-8') as f:
+            defaults = get_defaults(f)
+    else:
+        defaults = get_defaults(None)
+
     username = os.getenv('USER') or 'Anonymous'
     hostname = os.getenv('HOSTNAME') or 'localhost'
 
@@ -98,7 +106,8 @@ def main() -> None:
         if not answer.lower().startswith('y'):
             sys.exit('Will not overwrite. Bye!')
 
-    print(body(args), file=open(program, 'wt'), end='')
+    with open(program, 'wt', encoding='utf-8') as f:
+        print(body(args), file=f, end='')
 
     if platform.system() != 'Windows':
         subprocess.run(['chmod', '+x', program], check=True)
@@ -113,7 +122,9 @@ def main() -> None:
         if os.path.isfile(test_file):
             print(f'Will not overwrite "{test_file}"!')
         else:
-            print(text_test(args.program), file=open(test_file, 'wt'))
+            with open(test_file, 'wt', encoding='utf-8') as f:
+                print(text_test(args.program), file=f)
+
 
         makefile_text = [
             '.PHONY: test', '', 'test:',
@@ -123,7 +134,8 @@ def main() -> None:
         if os.path.isfile(makefile):
             print(f'Will not overwrite "{makefile}"!')
         else:
-            print('\n'.join(makefile_text), file=open('Makefile', 'wt'))
+            with open('Makefile', 'wt', encoding='utf-8') as f:
+                print('\n'.join(makefile_text), file=f)
 
     print(f'Done, see new script "{program}".')
 

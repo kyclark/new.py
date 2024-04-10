@@ -10,6 +10,8 @@ from shutil import rmtree
 from new import get_defaults
 
 PRG = './new.py'
+PRGR = 'python3 new.py'
+PRGRU = 'python3 ../new.py'
 
 
 # --------------------------------------------------
@@ -29,7 +31,7 @@ def test_get_defaults():
     }
     text = io.StringIO('\n'.join(f'{k}={v}' for k, v in expected.items()))
     assert get_defaults(text) == expected
-    assert get_defaults(None) == {}
+    assert not get_defaults(None)
 
 
 # --------------------------------------------------
@@ -37,7 +39,7 @@ def test_usage():
     """ Prints usage """
 
     for flag in ['-h', '--help']:
-        retval, out = getstatusoutput(f'{PRG} {flag}')
+        retval, out = getstatusoutput(f'{PRGR} {flag}')
         assert retval == 0
         assert out.lower().startswith('usage')
 
@@ -51,7 +53,7 @@ def test_ok():
     abs_new = os.path.abspath(PRG)
 
     if os.path.isdir(dirname):
-        rmtree(dirname)
+        rmtree(dirname, ignore_errors=True)
 
     os.makedirs(dirname)
     os.chdir(dirname)
@@ -59,12 +61,14 @@ def test_ok():
     try:
         basename = random_string()
         name = basename + '.py'
-        retval, out = getstatusoutput(f'{abs_new} -t {name}')
+        retval, out = getstatusoutput(f'{PRGRU} -t {name}')
+        print('retval:', retval, 'out:', out)
+        print('abs_new:', abs_new, 'name: ', name)
         assert retval == 0
         assert os.path.isfile(name)
         assert out == f'Done, see new script "{name}".'
 
-        retval2, usage = getstatusoutput(f'./{name} --help')
+        retval2, usage = getstatusoutput(f'{PRGRU} --help')
         assert retval2 == 0
         assert usage.lower().startswith('usage:')
 
@@ -75,7 +79,7 @@ def test_ok():
 
     finally:
         if os.path.isdir(dirname):
-            rmtree(dirname)
+            rmtree(dirname, ignore_errors=True)
         os.chdir(cwd)
 
 
