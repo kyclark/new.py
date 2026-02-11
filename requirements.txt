@@ -1,6 +1,0 @@
-pytest
-flake8
-flake8-builtins
-flake8-pytest
-pylint
-pytest-pylint

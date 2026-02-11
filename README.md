@@ -70,7 +70,9 @@ $ new.py foo.py -f
 Done, see new script "foo.py."
 ```
 
-You can indicate the name and email address you wish to appear in the program's docstrings, or you can write a "~/.new.py" configuration file with these parameters, e.g.:
+You can indicate the name and email address you wish to appear in the
+program's docstrings, or you can write a _~/.new.py_ configuration file
+with these parameters, e.g.:
 
 ```
 $ cat ~/.new.py
@@ -124,17 +126,6 @@ This means that `$HOME/.local/bin` will usually the be location where binaries w
 ```
 export PATH=$HOME/.local/bin:$PATH
 ```
-
-## See Also
-
-I first created a version of this program for [Tiny Python Projects](http://tinypythonprojects.com/):
-
-https://github.com/kyclark/tiny_python_projects/blob/master/bin/new.py
-
-This version is different in that it incorporates type hints and uses structures like named tuples as records/structs to represent complex, typed objects such as the program "Args".
-
-[Chapter 1](http://tinypythonprojects.com/#/chapters/1) of the book covers how to use "new.py" to start a new program.
-The [appendix](http://tinypythonprojects.com/#/chapters/23) covers argparse in greater detail.
 
 ## Author
 
